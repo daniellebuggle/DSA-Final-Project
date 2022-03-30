@@ -12,10 +12,40 @@ public class Main {
     static DirectedEdge edge = new DirectedEdge(1,2,3);
     static ArrayList<Integer> busStops;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         readStops("stops.txt");
         readFileTransfers("transfers.txt");
         readFileStopTimes("stop_times.txt");
+
+        Scanner scanner = new Scanner(System.in);
+        boolean end = false;
+        while(!end) {
+            System.out.println("Enter Bus Stop ID (from): ");
+            int from = scanner.nextInt();
+            System.out.println("Enter Bus Stop ID (to): ");
+            int to = scanner.nextInt();
+            int arrayValueFrom = binarySearch(busStops, from);
+            int arrayValueTo = binarySearch(busStops, to);
+            if(arrayValueFrom == -1){
+                System.out.println("Bus Stop " + from + " does not exist.\nPlease Enter new stops");
+            }else if(arrayValueTo == -1){
+                System.out.println("Bus Stop " + to + " does not exist.\nPlease Enter new stops");
+            }else {
+                DijkstraSP dijkstraSP = new DijkstraSP(graph, arrayValueFrom);
+                if (dijkstraSP.hasPathTo(arrayValueTo)) {
+                    StdOut.printf("%d to %d \n", from, to);
+                    for (DirectedEdge e : dijkstraSP.pathTo(arrayValueTo)) {
+                        StdOut.printf("%d to %d, cost: (%.2f)\n", busStops.get(e.from()), busStops.get(e.to()), e.weight());
+                    }
+                    StdOut.println();
+                }
+                System.out.println("Shortest Path costs: " + dijkstraSP.distTo(arrayValueTo));
+                end = true;
+            }
+        }
+
+
+
     }
 
     public static void readFileTransfers(String filename){
@@ -74,7 +104,7 @@ public class Main {
             }
             System.out.println("Number of Edges: " + graph.E());
             System.out.println("Number of Vertices: " + graph.V());
-            System.out.println(graph);
+            //System.out.println(graph);
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
