@@ -1,15 +1,19 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+
+import edu.princeton.cs.algs4.*;
+
+
 
 
 public class Main {
-    static Graph graph;
-    static LinkedList<Edge> edges = new LinkedList<>();
+    static EdgeWeightedDigraph graph;
+    static DirectedEdge edge = new DirectedEdge(1,2,3);
+    static ArrayList<Integer> busStops;
 
     public static void main(String[] args){
+        readStops("stops.txt");
         readFileTransfers("transfers.txt");
         readFileStopTimes("stop_times.txt");
     }
@@ -21,17 +25,23 @@ public class Main {
             }
             File myObj = new File(filename);
             Scanner myReader = new Scanner(myObj);
-            int count = 0;
             myReader.nextLine(); // skip the first line
             while (myReader.hasNextLine()) {
                 String[] line = myReader.nextLine().split(",");
+
                 if(Objects.equals(line[2], "0")){
-                    Edge edge = new Edge(Integer.parseInt(line[0]),Integer.parseInt(line[1]),2);
-                    edges.add(edge);
+                    int matrixValueOne = binarySearch(busStops,Integer.parseInt(line[0]));
+                    int matrixValueTwo = binarySearch(busStops,Integer.parseInt(line[1]));
+                    edge = new DirectedEdge(matrixValueOne,matrixValueTwo,2);
+                    //System.out.println(edge);
+                    graph.addEdge(edge);
                 }else{
                     int cost = (Integer.parseInt(line[3]))/100;
-                    Edge edge = new Edge(Integer.parseInt(line[0]),Integer.parseInt(line[1]), cost);
-                    edges.add(edge);
+                    int matrixValueOne = binarySearch(busStops,Integer.parseInt(line[0]));
+                    int matrixValueTwo = binarySearch(busStops,Integer.parseInt(line[1]));
+                    DirectedEdge edge = new DirectedEdge(matrixValueOne,matrixValueTwo, cost);
+                    //System.out.println(edge);
+                    graph.addEdge(edge);
                 }
             }
             myReader.close();
@@ -54,14 +64,67 @@ public class Main {
             while (myReader.hasNextLine()) {
                 String[] lineTwo = myReader.nextLine().split(",");
                 if(Objects.equals(lineOne[0], lineTwo[0])) {
-                    Edge edge = new Edge(Integer.parseInt(lineOne[3]), Integer.parseInt(lineTwo[3]),1);
-                    edges.add(edge);
+                    int matrixValueOne = binarySearch(busStops,Integer.parseInt(lineOne[3]));
+                    int matrixValueTwo = binarySearch(busStops,Integer.parseInt(lineTwo[3]));
+                    DirectedEdge edge = new DirectedEdge(matrixValueOne, matrixValueTwo,1);
+                    graph.addEdge(edge);
+                    //System.out.println(edge);
                 }
                 lineOne = lineTwo;
             }
-            Edge edge = edges.getLast();
-            System.out.println("Vertice One: " + edge.getVerticeOne() + "\nVertice Two: " + edge.getVerticeTwo());
-            System.out.println("Number of Edges: " + edges.size());
+            System.out.println("Number of Edges: " + graph.E());
+            System.out.println("Number of Vertices: " + graph.V());
+            System.out.println(graph);
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public static int binarySearch(ArrayList<Integer> arr, int x)
+    {
+        int left = 0, right = arr.size() - 1;
+
+        while (left <= right)
+        {
+            int mid = left + (right - left) / 2;
+
+            // Check if x is present at mid
+            if (arr.get(mid) == x)
+                return mid;
+
+            // If x greater, ignore left half
+            if (arr.get(mid) < x)
+                left = mid + 1;
+
+                // If x is smaller, ignore right half
+            else
+                right = mid - 1;
+        }
+
+        // if we reach here, then element was
+        // not present
+        return -1;
+    }
+
+    public static void readStops(String filename){
+        try {
+            if (filename == null) {
+                return;
+            }
+            File myObj = new File(filename);
+            Scanner myReader = new Scanner(myObj);
+            myReader.nextLine(); // skip the first line
+            int count = 0;
+            busStops = new ArrayList<>();
+            while (myReader.hasNextLine()) {
+                String[] line = myReader.nextLine().split(",");
+                busStops.add(Integer.parseInt(line[0]));
+            }
+            Collections.sort(busStops);
+            //System.out.println(busStops);
+            graph = new EdgeWeightedDigraph(busStops.size());
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
