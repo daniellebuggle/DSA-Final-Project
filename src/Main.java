@@ -20,7 +20,34 @@ public class Main {
         readFileTransfers("transfers.txt");
         readFileStopTimes("stop_times.txt");
 
-        userSearchArrivalTime();
+        boolean exitEntireProgram = false;
+        while(!exitEntireProgram){
+            System.out.println("Please enter 1, 2 or 3 to use the following functions:");
+            System.out.println("To search for the shortest trip between two Bus Stops, by inputting their bus Stop ID" +
+                    "please enter 1.");
+            System.out.println("To search for a bus stop by name, please enter 2.");
+            System.out.println("To search for a trip given its arrival time, please enter 3.");
+            System.out.println("To exit the entire program please enter \"exit\".");
+            Scanner scanner = new Scanner(System.in);
+            if(scanner.hasNextInt()){
+                int valueInputted = scanner.nextInt();
+                if(valueInputted == 1){
+                    searchBusStop();
+                }else if(valueInputted == 2){
+                    searchByName();
+                }else if(valueInputted == 3){
+                    userSearchArrivalTime();
+                }else{
+                    System.out.println("Please enter a valid integer value i.e. 1, 2, or 3.");
+                }
+            }else{
+                String input = scanner.next();
+                if(input.equalsIgnoreCase("exit")){
+                    exitEntireProgram = true;
+                }
+            }
+        }
+
 
         StdOut.println("keysWithPrefix(\"W 41 AVE NS COLUMBIA ST EB\"):");
         for (String s : tst.keysWithPrefix("W 41 AVE NS COLUMBIA ST EB"))
@@ -29,43 +56,90 @@ public class Main {
 
         StdOut.println();
 
-        Scanner scanner = new Scanner(System.in);
-        boolean end = false;
-        while(!end) {
-            System.out.println("Enter Bus Stop ID (from): ");
-            int from = scanner.nextInt();
-            System.out.println("Enter Bus Stop ID (to): ");
-            int to = scanner.nextInt();
-            int arrayValueFrom = binarySearch(busStops, from);
-            int arrayValueTo = binarySearch(busStops, to);
-            if(arrayValueFrom == -1){
-                System.out.println("Bus Stop " + from + " does not exist.\nPlease Enter new stops");
-            }else if(arrayValueTo == -1){
-                System.out.println("Bus Stop " + to + " does not exist.\nPlease Enter new stops");
-            }else {
-                DijkstraSP dijkstraSP = new DijkstraSP(graph, arrayValueFrom);
-                if (dijkstraSP.hasPathTo(arrayValueTo)) {
-                    StdOut.printf("%d to %d \n", from, to);
-                    for (DirectedEdge e : dijkstraSP.pathTo(arrayValueTo)) {
-                        StdOut.printf("%d to %d, cost: (%.2f)\n", busStops.get(e.from()), busStops.get(e.to()), e.weight());
-                    }
-                    StdOut.println();
-                }
-                System.out.println("Shortest Path costs: " + dijkstraSP.distTo(arrayValueTo));
-                end = true;
-            }
-        }
-
 
 
     }
 
+    public static void searchByName(){
+        Scanner scanner = new Scanner(System.in);
+        boolean end = false;
+        while(!end) {
+            System.out.println("To exit this part of the program please enter \"quit\".");
+            System.out.println("Please enter bus stop name to search for: ");
+            String input = scanner.nextLine().trim();
+            if(input.equalsIgnoreCase("quit")){
+                end = true;
+            }else{
+                StdOut.println("Bus Stops beginning with (\"" + input + "\"):");
+                int count = 0;
+                for (String s : tst.keysWithPrefix(input.toUpperCase())) {
+                    count++;
+                    StdOut.println(s);
+                }
+                if(count == 0){
+                    StdOut.println("there were no bus stops with this predix.");
+                }
+                StdOut.println();
+            }
+        }
+    }
+
+    public static void searchBusStop(){
+        Scanner scanner = new Scanner(System.in);
+        boolean end = false;
+        while(!end) {
+            System.out.println("To exit this part of the program please enter \"quit\".");
+            System.out.println("Enter Bus Stop ID (from) or \"quit\": ");
+            if(scanner.hasNextInt()){
+                int from = scanner.nextInt();
+                System.out.println("Enter Bus Stop ID (to) or \"quit\": ");
+                if(scanner.hasNextInt()){
+                    int to = scanner.nextInt();
+                    int arrayValueFrom = binarySearch(busStops, from);
+                    int arrayValueTo = binarySearch(busStops, to);
+                    if(arrayValueFrom == -1){
+                        System.out.println("Bus Stop " + from + " does not exist.\nPlease Enter new stops.");
+                    }else if(arrayValueTo == -1){
+                        System.out.println("Bus Stop " + to + " does not exist.\nPlease Enter new stops.");
+                    }else {
+                        DijkstraSP dijkstraSP = new DijkstraSP(graph, arrayValueFrom);
+                        if (dijkstraSP.hasPathTo(arrayValueTo)) {
+                            StdOut.printf("%d to %d \n", from, to);
+                            for (DirectedEdge e : dijkstraSP.pathTo(arrayValueTo)) {
+                                StdOut.printf("%d to %d, cost: (%.2f)\n", busStops.get(e.from()), busStops.get(e.to()), e.weight());
+                            }
+                            StdOut.println();
+                        }
+                        System.out.println("Shortest Path costs: " + dijkstraSP.distTo(arrayValueTo));
+                    }
+                }else{
+                    if(scanner.next().equalsIgnoreCase("quit")){
+                        end = true;
+                    }else{
+                        System.out.println("Please enter quit or a valid Bus Stop ID.");
+                    }
+                }
+            }else{
+                if(scanner.next().equalsIgnoreCase("quit")){
+                    end = true;
+                }else{
+                    System.out.println("Please enter quit or a valid Bus Stop ID.");
+                }
+            }
+        }
+    }
+
     public static void checkArrivalTime(String time){
+        int count = 0;
         for (String allInfo : stopTimesInfo) {
             String[] allInfoSplit = allInfo.split(",");
             if (allInfoSplit[1].trim().equals(time)) {
+                count++;
                 System.out.println(allInfo);
             }
+        }
+        if(count == 0){
+            System.out.println("There were no trips with this arrival time.");
         }
     }
 
@@ -87,6 +161,7 @@ public class Main {
                                 Integer.parseInt(s);
                             }
                         }
+                        System.out.println("trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,pickup_type,drop_off_type,shape_dist_traveled");
                         checkArrivalTime(userInput);
                     }catch(Exception ignored){
                         System.out.println("Input arrival time in the correct format (hh:mm:ss).");
