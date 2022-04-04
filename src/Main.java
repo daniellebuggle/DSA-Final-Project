@@ -12,12 +12,15 @@ public class Main {
     static DirectedEdge edge = new DirectedEdge(1,2,3);
     static ArrayList<Integer> busStops;
     static ArrayList<String> busStopInfo;
+    static ArrayList<String> stopTimesInfo;
     static TST<String> tst;
 
     public static void main(String[] args) {
         readStops("stops.txt");
         readFileTransfers("transfers.txt");
         readFileStopTimes("stop_times.txt");
+
+        userSearchArrivalTime();
 
         StdOut.println("keysWithPrefix(\"W 41 AVE NS COLUMBIA ST EB\"):");
         for (String s : tst.keysWithPrefix("W 41 AVE NS COLUMBIA ST EB"))
@@ -55,6 +58,52 @@ public class Main {
 
 
 
+    }
+
+    public static void checkArrivalTime(String time){
+        for (String allInfo : stopTimesInfo) {
+            String[] allInfoSplit = allInfo.split(",");
+            if (allInfoSplit[1].trim().equals(time)) {
+                System.out.println(allInfo);
+            }
+        }
+    }
+
+    public static void userSearchArrivalTime(){
+        Scanner scanner = new Scanner(System.in);
+        boolean end = false;
+        while(!end){
+            System.out.println("Enter \"quit\" to exit this program.");
+            System.out.println("Enter arrival time in the format (hh:mm:ss): ");
+            if(scanner.hasNextLine()){
+                String userInput = scanner.nextLine().trim();
+                if(userInput.equalsIgnoreCase("quit")){
+                    end = true;
+                }else{
+                    String[] inputtedLineSplit = userInput.split(":");
+                    try{
+                        for (String s : inputtedLineSplit) {
+                            if (Integer.parseInt(s) >= 0) {
+                                Integer.parseInt(s);
+                            }
+                        }
+                        checkArrivalTime(userInput);
+                    }catch(Exception ignored){
+                        System.out.println("Input arrival time in the correct format (hh:mm:ss).");
+                    }
+                }
+            }else if(scanner.hasNext()){
+                String input = scanner.nextLine();
+                if(input.equalsIgnoreCase("quit")){
+                    end = true;
+                }else{
+                    System.out.println("Please enter quit or an arrival time.");
+                }
+            } else{
+                System.out.println("Incorrect format for arrival time please try again.");
+            }
+
+        }
     }
 
     public static void readFileTransfers(String filename){
@@ -95,23 +144,40 @@ public class Main {
             }
             File myObj = new File(filename);
             Scanner myReader = new Scanner(myObj);
-            int count = 0;
+            stopTimesInfo = new ArrayList<>();
             myReader.nextLine(); // skip the first line
-            String[] lineOne = myReader.nextLine().split(",");
+            String line = myReader.nextLine(); // read the line
+            String[] lineOne = line.split(",");
+            String[] time = lineOne[1].split(":"); // split the time into string array
+            time[0] = time[0].trim();
+            if(Integer.parseInt(time[0]) >= 0 && Integer.parseInt(time[0]) <= 23 ){
+                stopTimesInfo.add(line);
+                Collections.sort(stopTimesInfo);
+            }
             while (myReader.hasNextLine()) {
-                String[] lineTwo = myReader.nextLine().split(",");
+                String nextLine = myReader.nextLine();
+                String[] lineTwo = nextLine.split(",");
+                String[] timeGiven = lineTwo[1].split(":"); // split the time into string array
+                timeGiven[0] = timeGiven[0].trim();
+                if(Integer.parseInt(timeGiven[0]) >= 0 && Integer.parseInt(timeGiven[0]) <= 23 ){
+                    stopTimesInfo.add(nextLine);
+                }
                 if(Objects.equals(lineOne[0], lineTwo[0])) {
                     int matrixValueOne = binarySearch(busStops,Integer.parseInt(lineOne[3]));
                     int matrixValueTwo = binarySearch(busStops,Integer.parseInt(lineTwo[3]));
                     DirectedEdge edge = new DirectedEdge(matrixValueOne, matrixValueTwo,1);
                     graph.addEdge(edge);
-                    //System.out.println(edge);
                 }
                 lineOne = lineTwo;
             }
+            stopTimesInfo.sort((o1, o2) -> {
+                String[] lineSplit = o1.split(",");
+                String[] secondLineSplit = o2.split(",");
+                return lineSplit[0].compareTo(secondLineSplit[0]);
+            });
+
             System.out.println("Number of Edges: " + graph.E());
             System.out.println("Number of Vertices: " + graph.V());
-            //System.out.println(graph);
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
@@ -119,12 +185,10 @@ public class Main {
         }
     }
 
-    public static int binarySearch(ArrayList<Integer> arr, int x)
-    {
+    public static int binarySearch(ArrayList<Integer> arr, int x) {
         int left = 0, right = arr.size() - 1;
 
-        while (left <= right)
-        {
+        while (left <= right) {
             int mid = left + (right - left) / 2;
 
             // Check if x is present at mid
@@ -169,7 +233,6 @@ public class Main {
                 count++;
             }
             Collections.sort(busStops);
-            //System.out.println(busStops);
 
             StdOut.println("keys(\"\"):");
             for (String key : tst.keys()) {
@@ -215,7 +278,7 @@ public class Main {
         return name.trim();
     }
 
-    public static String formString(String[] array, String delimeter){
+    public static String formString(String[] array, String delimeter) {
         StringBuilder sb = new StringBuilder();
         for (String s : array) {
             sb.append(s).append(delimeter);
@@ -224,21 +287,19 @@ public class Main {
     }
 
 
-    public static String[] shiftLeftByN(String[] string, int n){
-        //System.out.println("Original Array: " + Arrays.toString(string));
-        for(int i = 0; i < n; i++){
-            int j;
-            String first;
+    public static String[] shiftLeftByN(String[] string, int n) {
+        for (int i = 0; i < n; i++) {
+            int j = 0;
             //Stores the first element of the array
-            first = string[0];
-            for(j = 0; j < string.length-1; j++){
+            String first = string[0];
+            for (; j < string.length - 1; j++) {
                 //Shift element of array by one
-                string[j] = string[j+1];
+                string[j] = string[j + 1];
             }
             //First element of array will be added to the end
             string[j] = first;
         }
-        //System.out.println("Array after rotation: " + Arrays.toString(string));
         return string;
     }
 }
+
