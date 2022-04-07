@@ -47,7 +47,7 @@ public class Main {
                 if (input.equalsIgnoreCase("exit")) {
                     exitEntireProgram = true;
                     System.out.println("Thank you, your session has ended.");
-                }else{
+                } else {
                     // error handling if user inputted invalid string value
                     System.out.println("Please enter a valid integer value or \"quit\".");
                 }
@@ -109,7 +109,7 @@ public class Main {
                     // if either are -1, bus stop does not exist and tells the user.
                     if (arrayValueFrom == -1) {
                         System.out.println("Bus Stop " + from + " does not exist.\nPlease Enter new stops.");
-                        if(arrayValueTo == -1){
+                        if (arrayValueTo == -1) {
                             System.out.println("Bus Stop " + to + " does not exist.\nPlease Enter new stops.");
                         }
                         return;
@@ -155,6 +155,7 @@ public class Main {
     /**
      * Function used to check user inputted time is associated with any of the trips.
      * Prints out each trip associated with time parameter sorted by trip ID.
+     *
      * @param time
      */
     public static void checkArrivalTime(String time) {
@@ -222,6 +223,7 @@ public class Main {
 
     /**
      * Method to read in the file transfers.txt and initialise all data that needs to be used.
+     *
      * @param filename
      */
     public static void readFileTransfers(String filename) {
@@ -261,7 +263,8 @@ public class Main {
     }
 
     /**
-     * Method to read in the file transfers.txt and initialise all data that needs to be used.
+     * Method to read in the file stop_times.txt and initialise all data that needs to be used.
+     *
      * @param filename
      */
     public static void readFileStopTimes(String filename) {
@@ -305,8 +308,6 @@ public class Main {
                 return lineSplit[0].compareTo(secondLineSplit[0]);
             });
 
-            System.out.println("Number of Edges: " + graph.E());
-            System.out.println("Number of Vertices: " + graph.V());
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
@@ -317,6 +318,7 @@ public class Main {
     /**
      * Credit: https://www.geeksforgeeks.org/binary-search/
      * Method to implement binary search on an ArrayList of type integer
+     *
      * @param arr
      * @param x
      * @return index of the array the value searched for is positioned
@@ -347,6 +349,7 @@ public class Main {
 
     /**
      * Method to read in the stops.txt file and initialise all data that needs to be used.
+     *
      * @param filename
      */
     public static void readStops(String filename) {
@@ -387,6 +390,7 @@ public class Main {
     /**
      * Method to shift the name of the bus stop to move to the end of the name unnecessary keywords such as flagstop,
      * wb, nb, sb and eb.
+     *
      * @param name
      * @return Changed String with the new bus stop name.
      */
@@ -421,7 +425,8 @@ public class Main {
 
     /**
      * Method to create new string with given a string array and a delimiter
-     * @param array String array to be used to form new string
+     *
+     * @param array     String array to be used to form new string
      * @param delimeter delimiter to be used to form string e.g. "," ":"
      * @return The formed string using the delimiter
      */
@@ -436,8 +441,9 @@ public class Main {
 
     /**
      * Method to shift a string array left by n.
+     *
      * @param string String array to be shifted
-     * @param n Shift string array by n
+     * @param n      Shift string array by n
      */
     public static void shiftLeftByN(String[] string, int n) {
         for (int i = 0; i < n; i++) {
