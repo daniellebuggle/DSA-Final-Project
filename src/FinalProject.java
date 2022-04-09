@@ -4,7 +4,7 @@ import java.util.*;
 
 import edu.princeton.cs.algs4.*;
 
-public class Main {
+public class FinalProject {
     static EdgeWeightedDigraph graph; // empty graph used in Dijkstra
     static DirectedEdge edge; // edges to be added to graph for Dijkstra
     static ArrayList<Integer> busStops; // arraylist of integers used as corresponding matrix value for creation of
@@ -18,7 +18,6 @@ public class Main {
         readStops("stops.txt");
         readFileTransfers("transfers.txt");
         readFileStopTimes("stop_times.txt");
-
         boolean exitEntireProgram = false; // used for program loop
         while (!exitEntireProgram) {
             System.out.println("Please enter 1, 2 or 3 to use the following functions:\n");
@@ -55,35 +54,6 @@ public class Main {
         }
 
 
-    }
-
-
-    /**
-     * Method used to implement functionality of searching for a bus stop by name using prefixes.
-     */
-    public static void searchByName() {
-        Scanner scanner = new Scanner(System.in);
-        boolean end = false; // boolean used for looping this part of the program.
-        while (!end) {
-            System.out.println("To exit this part of the program please enter \"quit\".");
-            System.out.println("Please enter bus stop name to search for: ");
-            String input = scanner.nextLine().trim(); // trim whitespace from inputted from user
-            if (input.equalsIgnoreCase("quit")) {
-                // exit this part of the program if user enters quit
-                end = true;
-            } else {
-                StdOut.println("Bus Stops beginning with (\"" + input + "\"):");
-                int count = 0;
-                for (String s : tst.keysWithPrefix(input.toUpperCase())) {
-                    count++; // count used to check if bus stops with this name were found
-                    StdOut.println(s); // print out each bus stop name with inputted prefix
-                }
-                if (count == 0) {
-                    StdOut.println("There were no Bus Stops with this prefix.");
-                }
-                StdOut.println();
-            }
-        }
     }
 
     /**
@@ -153,24 +123,30 @@ public class Main {
     }
 
     /**
-     * Function used to check user inputted time is associated with any of the trips.
-     * Prints out each trip associated with time parameter sorted by trip ID.
-     *
-     * @param time
+     * Method used to implement functionality of searching for a bus stop by name using prefixes.
      */
-    public static void checkArrivalTime(String time) {
-        int count = 0; // used to count if any times match
-        // loops through entire list checking if time matches
-        for (String allInfo : stopTimesInfo) {
-            String[] allInfoSplit = allInfo.split(",");
-            if (allInfoSplit[1].trim().equals(time)) {
-                count++;
-                System.out.println(allInfo); // prints out trip information if time matches
+    public static void searchByName() {
+        Scanner scanner = new Scanner(System.in);
+        boolean end = false; // boolean used for looping this part of the program.
+        while (!end) {
+            System.out.println("To exit this part of the program please enter \"quit\".");
+            System.out.println("Please enter bus stop name to search for: ");
+            String input = scanner.nextLine().trim(); // trim whitespace from inputted from user
+            if (input.equalsIgnoreCase("quit")) {
+                // exit this part of the program if user enters quit
+                end = true;
+            } else {
+                StdOut.println("Bus Stops beginning with (\"" + input + "\"):");
+                int count = 0;
+                for (String s : tst.keysWithPrefix(input.toUpperCase())) {
+                    count++; // count used to check if bus stops with this name were found
+                    StdOut.println(s); // print out each bus stop name with inputted prefix
+                }
+                if (count == 0) {
+                    StdOut.println("There were no Bus Stops with this prefix.");
+                }
+                StdOut.println();
             }
-        }
-        if (count == 0) {
-            // if no times match informs the user
-            System.out.println("There were no trips with this arrival time.");
         }
     }
 
@@ -222,9 +198,49 @@ public class Main {
     }
 
     /**
+     * Method to read in the stops.txt file and initialise all data that needs to be used.
+     *
+     * @param filename name of the file to be read
+     */
+    public static void readStops(String filename) {
+        try {
+            if (filename == null) {
+                return;
+            }
+            File myObj = new File(filename);
+            Scanner myReader = new Scanner(myObj);
+            myReader.nextLine(); // skip the first line
+            int count = 0; // used for positioning in TST
+            busStops = new ArrayList<>(); // initialise busStops array
+            tst = new TST<>(); // initialise tst
+            // loops while there is still data to read in the file
+            while (myReader.hasNextLine()) {
+                String[] line = myReader.nextLine().split(","); // split line using delimiter ","
+                busStops.add(Integer.parseInt(line[0])); // add each bus stop ID to array and using its index as its
+                // corresponding matrix value for creation of the graph
+                String name = changeName(line[2]); // function edits bus stop name to remove unnecessary keywords at the
+                // beginning of the name
+                line[2] = name; // store new name back
+                shiftLeftByN(line, 2); // shift left by 2 to put the name of bus stop at the beginning
+                String newLine = formString(line, ","); // form new line with bus stop at the beginning
+                // split by commas
+                tst.put(newLine, Integer.toString(count)); // put new line in the tst
+                count++;
+            }
+            Collections.sort(busStops); // sort Bus Stop array in ascending order
+            graph = new EdgeWeightedDigraph(busStops.size()); // create graph with size of busStops because that is the
+            // number of vertices
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Method to read in the file transfers.txt and initialise all data that needs to be used.
      *
-     * @param filename
+     * @param filename name of the file to read
      */
     public static void readFileTransfers(String filename) {
         try {
@@ -265,7 +281,7 @@ public class Main {
     /**
      * Method to read in the file stop_times.txt and initialise all data that needs to be used.
      *
-     * @param filename
+     * @param filename name of the file to read
      */
     public static void readFileStopTimes(String filename) {
         try {
@@ -276,21 +292,9 @@ public class Main {
             Scanner myReader = new Scanner(myObj);
             stopTimesInfo = new ArrayList<>();
             myReader.nextLine(); // skip the first line
-            String line = myReader.nextLine(); // read the line
-            String[] lineOne = line.split(",");
-            String[] time = lineOne[1].split(":"); // split the time into string array
-            time[0] = time[0].trim(); // gets rid of the whitespace
-            if (Integer.parseInt(time[0]) >= 0 && Integer.parseInt(time[0]) <= 23) {
-                stopTimesInfo.add(line); // adds all stop info into the arrayList for use in printing later
-            }
+            String[] lineOne = readLineAddInfo(myReader);
             while (myReader.hasNextLine()) {
-                String nextLine = myReader.nextLine();
-                String[] lineTwo = nextLine.split(",");
-                String[] timeGiven = lineTwo[1].split(":"); // split the time into string array
-                timeGiven[0] = timeGiven[0].trim(); // gets rid of whitespace
-                if (Integer.parseInt(timeGiven[0]) >= 0 && Integer.parseInt(timeGiven[0]) <= 23) {
-                    stopTimesInfo.add(nextLine); // adds all stop info into the arrayList for use in printing later
-                }
+                String[] lineTwo = readLineAddInfo(myReader);
                 if (Objects.equals(lineOne[0], lineTwo[0])) {
                     // get corresponding matrix value for each of bus stop id
                     int matrixValueOne = binarySearch(busStops, Integer.parseInt(lineOne[3]));
@@ -316,74 +320,67 @@ public class Main {
     }
 
     /**
+     * Method to read and split line from txt file. Add any trips with valid arrival times to
+     * array.
+     *
+     * @param myReader Scanner used to read file
+     * @return Line read split into array.
+     */
+    private static String[] readLineAddInfo(Scanner myReader) {
+        String line = myReader.nextLine(); // read the line
+        String[] lineSplit = line.split(",");
+        String[] time = lineSplit[1].split(":"); // split the time into string array
+        time[0] = time[0].trim(); // gets rid of the whitespace
+        if (Integer.parseInt(time[0]) >= 0 && Integer.parseInt(time[0]) <= 23) {
+            stopTimesInfo.add(line); // adds all stop info into the arrayList for use in printing later
+        }
+        return lineSplit;
+    }
+
+    /**
      * Credit: https://www.geeksforgeeks.org/binary-search/
      * Method to implement binary search on an ArrayList of type integer
      *
-     * @param arr
-     * @param x
+     * @param arr array to be searched
+     * @param x   valued in the array to be searched for
      * @return index of the array the value searched for is positioned
      */
     public static int binarySearch(ArrayList<Integer> arr, int x) {
-        int left = 0, right = arr.size() - 1;
-
+        int left = 0;
+        int right = arr.size() - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
-
             // Check if x is present at mid
-            if (arr.get(mid) == x)
-                return mid;
-
+            if (arr.get(mid) == x) return mid;
             // If x greater, ignore left half
-            if (arr.get(mid) < x)
-                left = mid + 1;
-
-                // If x is smaller, ignore right half
-            else
-                right = mid - 1;
+            if (arr.get(mid) < x) left = mid + 1;
+            // If x is smaller, ignore right half
+            else right = mid - 1;
         }
-
         // if we reach here, then element was
         // not present
         return -1;
     }
 
     /**
-     * Method to read in the stops.txt file and initialise all data that needs to be used.
+     * Function used to check user inputted time is associated with any of the trips.
+     * Prints out each trip associated with time parameter sorted by trip ID.
      *
-     * @param filename
+     * @param time inputted time to search for
      */
-    public static void readStops(String filename) {
-        try {
-            if (filename == null) {
-                return;
-            }
-            File myObj = new File(filename);
-            Scanner myReader = new Scanner(myObj);
-            myReader.nextLine(); // skip the first line
-            int count = 0; // used for positioning in TST
-            busStops = new ArrayList<>(); // initialise busStops array
-            tst = new TST<>(); // initialise tst
-            // loops while there is still data to read in the file
-            while (myReader.hasNextLine()) {
-                String[] line = myReader.nextLine().split(","); // split line using delimiter ","
-                busStops.add(Integer.parseInt(line[0])); // add each bus stop ID to array and using its index as its
-                // corresponding matrix value for creation of the graph
-                String name = changeName(line[2]); // function edits bus stop name to remove unnecessary keywords at the
-                // beginning of the name
-                line[2] = name; // store new name back
-                shiftLeftByN(line, 2); // shift left by 2 to put the name of bus stop at the beginning
-                String newLine = formString(line, ","); // form new line with bus stop at the beginning
-                // split by commas
-                tst.put(newLine, Integer.toString(count)); // put new line in the tst
+    public static void checkArrivalTime(String time) {
+        int count = 0; // used to count if any times match
+        // loops through entire list checking if time matches
+        for (String allInfo : stopTimesInfo) {
+            String[] allInfoSplit = allInfo.split(",");
+            if (allInfoSplit[1].trim().equals(time)) {
                 count++;
+                System.out.println(allInfo); // prints out trip information if time matches
             }
-            Collections.sort(busStops); // sort Bus Stop array in ascending order
-            graph = new EdgeWeightedDigraph(busStops.size()); // create graph with size of busStops because that is the
-            // number of vertices
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+        }
+        if (count == 0) {
+            // if no times match informs the user
+            System.out.println("There were no trips with this arrival time.");
         }
     }
 
@@ -391,53 +388,37 @@ public class Main {
      * Method to shift the name of the bus stop to move to the end of the name unnecessary keywords such as flagstop,
      * wb, nb, sb and eb.
      *
-     * @param name
+     * @param name name of the bus stop to be edited
      * @return Changed String with the new bus stop name.
      */
     public static String changeName(String name) {
         String[] nameSplit = name.split(" ");
-        if (nameSplit[0].equalsIgnoreCase("flagstop") ||
-                nameSplit[0].equalsIgnoreCase("wb") ||
-                nameSplit[0].equalsIgnoreCase("nb") ||
-                nameSplit[0].equalsIgnoreCase("sb") ||
-                nameSplit[0].equalsIgnoreCase("eb")) {
-            if (nameSplit[1].equalsIgnoreCase("flagstop") ||
-                    nameSplit[1].equalsIgnoreCase("wb") ||
-                    nameSplit[1].equalsIgnoreCase("nb") ||
-                    nameSplit[1].equalsIgnoreCase("sb") ||
-                    nameSplit[1].equalsIgnoreCase("eb")) {
-                if (nameSplit[2].equalsIgnoreCase("flagstop") ||
-                        nameSplit[2].equalsIgnoreCase("wb") ||
-                        nameSplit[2].equalsIgnoreCase("nb") ||
-                        nameSplit[2].equalsIgnoreCase("sb") ||
-                        nameSplit[2].equalsIgnoreCase("eb")) {
-                    shiftLeftByN(nameSplit, 3);
-                } else {
-                    shiftLeftByN(nameSplit, 2);
-                }
-            } else {
+        for (int i = 0; i < 2; i++) {
+            if (nameSplit[i].equalsIgnoreCase("flagstop") ||
+                    nameSplit[i].equalsIgnoreCase("wb") ||
+                    nameSplit[i].equalsIgnoreCase("nb") ||
+                    nameSplit[i].equalsIgnoreCase("sb") ||
+                    nameSplit[i].equalsIgnoreCase("eb")) {
                 shiftLeftByN(nameSplit, 1);
             }
-            name = formString(nameSplit, " ");
         }
-        return name.trim();
+        return formString(nameSplit, " ").trim();
     }
 
     /**
      * Method to create new string with given a string array and a delimiter
      *
      * @param array     String array to be used to form new string
-     * @param delimeter delimiter to be used to form string e.g. "," ":"
+     * @param delimiter delimiter to be used to form string e.g. "," ":"
      * @return The formed string using the delimiter
      */
-    public static String formString(String[] array, String delimeter) {
+    public static String formString(String[] array, String delimiter) {
         StringBuilder sb = new StringBuilder();
         for (String s : array) {
-            sb.append(s).append(delimeter);
+            sb.append(s).append(delimiter);
         }
         return sb.toString();
     }
-
 
     /**
      * Method to shift a string array left by n.
@@ -459,4 +440,3 @@ public class Main {
         }
     }
 }
-
