@@ -82,7 +82,6 @@ public class FinalProject {
                         if (arrayValueTo == -1) {
                             System.out.println("Bus Stop " + to + " does not exist.\nPlease Enter new stops.");
                         }
-                        return;
                     } else if (arrayValueTo == -1) {
                         System.out.println("Bus Stop " + to + " does not exist.\nPlease Enter new stops.");
                     } else {
@@ -97,9 +96,11 @@ public class FinalProject {
                                         busStops.get(e.to()), e.weight());
                             }
                             StdOut.println();
+                            // print out total cost of SP
+                            System.out.println("Shortest Path costs a total of: " + dijkstraSP.distTo(arrayValueTo));
+                        }else{
+                            System.out.println("There is no path between Bus Stop: " + from + " and Bus Stop: " + to);
                         }
-                        // print out total cost of SP
-                        System.out.println("Shortest Path costs a total of: " + dijkstraSP.distTo(arrayValueTo));
                     }
                 } else {
                     if (scanner.next().equalsIgnoreCase("quit")) {
@@ -158,7 +159,7 @@ public class FinalProject {
         boolean end = false; // boolean used for looping this part of the program.
         while (!end) {
             System.out.println("Enter \"quit\" to exit this program.");
-            System.out.println("Enter arrival time in the format (hh:mm:ss): ");
+            System.out.println("Enter arrival time in the format (h:mm:ss): ");
             if (scanner.hasNextLine()) {
                 String userInput = scanner.nextLine().trim(); // trim whitespace inputted by user
                 if (userInput.equalsIgnoreCase("quit")) {
@@ -178,7 +179,7 @@ public class FinalProject {
                         checkArrivalTime(userInput); // function to print out each trip with users inputted arrival time
                     } catch (Exception ignored) {
                         // error handling for if user did not input valid time in the correct format
-                        System.out.println("Input arrival time in the correct format (hh:mm:ss).\n");
+                        System.out.println("Input arrival time in the correct format (h:mm:ss).\n");
                     }
                 }
             } else if (scanner.hasNext()) {
